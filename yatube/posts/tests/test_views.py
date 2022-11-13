@@ -64,21 +64,20 @@ class PostPagesTests(TestCase):
         Страницы создаются с  верным контекст
         """
         addresses = [
-            URL_INDEX,  # страница с пагинацией. В контексте 'page_obj'
-            URL_GROUP,  # страница с пагинацией. В контексте 'page_obj'
-            URL_AUTHOR_PROFILE,  # с пагинацией. В контексте 'page_obj'
-            PostPagesTests.POST_URL,  # без пагинации. В контексте 'post'
+            URL_INDEX,
+            URL_GROUP,
+            URL_AUTHOR_PROFILE,
+            PostPagesTests.POST_URL,
         ]
         for adress in addresses:
             response = self.author_client.get(adress)
             if (
                 "page_obj" in response.context
-            ):  # мы используем "in", чтобы в правильно сформировать post.
-                # Так как на странице детального поста, нет 'page obj'.
+            ):
                 post = response.context.get("page_obj")[
                     0
-                ]  # если использовать assertIn, то тест для страницы
-            else:  # детального поста всегда будет "падать"
+                ]
+            else:
                 post = response.context.get("post")
             self.check_post_info(post)
 
@@ -98,6 +97,9 @@ class PostPagesTests(TestCase):
 
 
 class PaginatorViewsTest(TestCase):
+    POSTS_ON_FIRST_PAGE = 10
+    POSTS_ON_SECOND_PAGE = 3
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -119,8 +121,6 @@ class PaginatorViewsTest(TestCase):
 
     def test_paginator_on_pages(self):
         """Проверка пагинации на страницах."""
-        posts_on_first_page = 10
-        posts_on_second_page = 3
         for reverse_address in PaginatorViewsTest.PAGES_WITH_PAGINATOR:
             with self.subTest(reverse_address=reverse_address):
                 self.assertEqual(
@@ -129,7 +129,7 @@ class PaginatorViewsTest(TestCase):
                             reverse_address
                         ).context.get("page_obj")
                     ),
-                    posts_on_first_page,
+                    self.POSTS_ON_FIRST_PAGE,
                 )
                 self.assertEqual(
                     len(
@@ -137,5 +137,5 @@ class PaginatorViewsTest(TestCase):
                             reverse_address + "?page=2"
                         ).context.get("page_obj")
                     ),
-                    posts_on_second_page,
+                    self.POSTS_ON_SECOND_PAGE,
                 )

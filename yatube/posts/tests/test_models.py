@@ -1,10 +1,10 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from ..models import Group, Post
+from ..models import Group, Post, User
 from .const import AUTHOR_USERNAME, GROUP_SLUG
 
-User = get_user_model()
 
 
 class PostModelTest(TestCase):
@@ -29,7 +29,10 @@ class PostModelTest(TestCase):
 
     def test_post_str(self):
         """Проверка __str__ у post."""
-        self.assertEqual(PostModelTest.post.text[:15], str(PostModelTest.post))
+        error = f"Вывод не имеет {settings.LEN_OF_POST} символов"
+        self.assertEqual(self.post.__str__(),
+                         self.post.text[:settings.LEN_OF_POST],
+                         error)
 
     def test_post_verbose_name(self):
         """Проверка verbose_name у post."""

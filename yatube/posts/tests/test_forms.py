@@ -4,10 +4,9 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from ..models import Group, Post
+from ..models import Group, Post, User
 from .const import AUTHOR_USERNAME, GROUP_SLUG
 
-User = get_user_model()
 
 
 class PostFormTests(TestCase):
@@ -22,15 +21,15 @@ class PostFormTests(TestCase):
         )
 
     def setUp(self):
-        self.guest_user = Client()
-        self.authorized_user = Client()
-        self.authorized_user.force_login(self.post_author)
+        self.anon = Client()
+        self.auth = Client()
+        self.auth.force_login(self.post_author)
 
     def test_authorized_user_create_post(self):
         """Проверка создания записи авторизированным клиентом."""
         posts_count = Post.objects.count()
         form_data = {"text": "Текст поста", "group": self.group.id}
-        response = self.authorized_user.post(
+        response = self.auth.post(
             reverse("posts:post_create"), data=form_data, follow=True
         )
         self.assertRedirects(
@@ -56,7 +55,7 @@ class PostFormTests(TestCase):
             "text": "Отредактированный текст поста",
             "group": self.group.id,
         }
-        response = self.authorized_user.post(
+        response = self.auth.post(
             reverse("posts:post_edit", args=[post.id]),
             data=form_data,
             follow=True,
@@ -74,7 +73,7 @@ class PostFormTests(TestCase):
         """Проверка создания записи не авторизированным пользователем."""
         posts_count = Post.objects.count()
         form_data = {"text": "Текст поста", "group": self.group.id}
-        response = self.guest_user.post(
+        response = self.anon.post(
             reverse("posts:post_create"), data=form_data, follow=True
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)

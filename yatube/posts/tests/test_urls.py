@@ -3,6 +3,8 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from http import HTTPStatus
+
+from ..models import User
 from posts.models import Post, Group
 from .const import (
     AUTHOR_USERNAME,
@@ -13,14 +15,12 @@ from .const import (
     URL_CREATE_POST,
 )
 
-User = get_user_model()
-
 
 class PostURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.author_user = User.objects.create(username=AUTHOR_USERNAME)
+        cls.author_user = User.objects.create_user(username=AUTHOR_USERNAME)
         cls.group = Group.objects.create(
             title="группа", slug=GROUP_SLUG, description="проверка описания"
         )
@@ -70,13 +70,11 @@ class PostURLTests(TestCase):
                 f"{adress} вернул другой статус код. Нежели {status}",
             )
 
-    # Проверяем статус 404 для авторизованного пользователя
     def test_task_list_url_redirect_anonymous(self):
         """Страница /unexisting_page/ не существует."""
         response = self.authorized_client.get("/unexisting_page/")
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
-    # Проверка вызываемых шаблонов для каждого адреса
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
         for url, template in PostURLTests.URL_TO_TEMPLATE.items():
