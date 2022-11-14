@@ -97,6 +97,8 @@ class PostPagesTests(TestCase):
 
 
 class PaginatorViewsTest(TestCase):
+    POSTS_ON_FIRST_PAGE = 10
+    POSTS_ON_SECOND_PAGE = 3
 
     @classmethod
     def setUpClass(cls):
@@ -118,8 +120,6 @@ class PaginatorViewsTest(TestCase):
         self.unauthorized_client = Client()
 
     def test_paginator_on_pages(self):
-        POSTS_ON_FIRST_PAGE = 10
-        POSTS_ON_SECOND_PAGE = 3
         """Проверка пагинации на страницах."""
         for reverse_address in PaginatorViewsTest.PAGES_WITH_PAGINATOR:
             with self.subTest(reverse_address=reverse_address):
@@ -129,7 +129,7 @@ class PaginatorViewsTest(TestCase):
                             reverse_address
                         ).context.get("page_obj")
                     ),
-                    POSTS_ON_FIRST_PAGE,
+                    self.POSTS_ON_FIRST_PAGE,
                 )
                 self.assertEqual(
                     len(
@@ -137,5 +137,5 @@ class PaginatorViewsTest(TestCase):
                             reverse_address + "?page=2"
                         ).context.get("page_obj")
                     ),
-                    POSTS_ON_SECOND_PAGE,
+                    self.POSTS_ON_SECOND_PAGE,
                 )

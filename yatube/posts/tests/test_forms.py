@@ -1,12 +1,10 @@
 from http import HTTPStatus
 
-from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from ..models import Group, Post, User
 from .const import AUTHOR_USERNAME, GROUP_SLUG
-
 
 
 class PostFormTests(TestCase):
@@ -27,6 +25,7 @@ class PostFormTests(TestCase):
 
     def test_authorized_user_create_post(self):
         """Проверка создания записи авторизированным клиентом."""
+        Post.objects.all().delete()
         posts_count = Post.objects.count()
         form_data = {"text": "Текст поста", "group": self.group.id}
         response = self.auth.post(
