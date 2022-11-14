@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.test import TestCase
 
 from ..models import Group, Post, User
@@ -27,10 +26,7 @@ class PostModelTest(TestCase):
 
     def test_post_str(self):
         """Проверка __str__ у post."""
-        error = f"Вывод не имеет {settings.LEN_OF_POST} символов"
-        self.assertEqual(self.post.__str__(),
-                         self.post.text[:settings.LEN_OF_POST],
-                         error)
+        self.assertEqual(PostModelTest.post.text[:15], str(PostModelTest.post))
 
     def test_post_verbose_name(self):
         """Проверка verbose_name у post."""
