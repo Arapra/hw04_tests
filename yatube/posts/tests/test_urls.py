@@ -3,8 +3,7 @@ from django.urls import reverse
 
 from http import HTTPStatus
 
-from ..models import User
-from posts.models import Post, Group
+from ..models import User, Post, Group
 from .const import (
     AUTHOR_USERNAME,
     GROUP_SLUG,

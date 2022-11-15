@@ -1,9 +1,8 @@
 from django import forms
-from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from ..models import Group, Post
+from ..models import User, Group, Post
 from .const import (
     AUTHOR_USERNAME,
     GROUP_SLUG,
@@ -12,8 +11,6 @@ from .const import (
     URL_AUTHOR_PROFILE,
     URL_CREATE_POST,
 )
-
-User = get_user_model()
 
 
 class PostPagesTests(TestCase):
@@ -35,8 +32,8 @@ class PostPagesTests(TestCase):
         cls.POST_EDIT_URL = reverse("posts:post_edit", args=[cls.post.id])
 
     def setUp(self):
-        self.author_client = Client()
-        self.author_client.force_login(PostPagesTests.author_user)
+        self.auth = Client()
+        self.auth.force_login(PostPagesTests.author_user)
 
     def check_post_info(self, post):
         self.assertEqual(post.text, PostPagesTests.post.text)
@@ -49,7 +46,7 @@ class PostPagesTests(TestCase):
         adresses = (URL_CREATE_POST, PostPagesTests.POST_EDIT_URL)
         for adress in adresses:
             with self.subTest(adress=adress):
-                response = self.author_client.get(adress)
+                response = self.auth.get(adress)
                 self.assertIsInstance(
                     response.context["form"].fields["text"],
                     forms.fields.CharField,
@@ -70,7 +67,7 @@ class PostPagesTests(TestCase):
             PostPagesTests.POST_URL,
         ]
         for adress in addresses:
-            response = self.author_client.get(adress)
+            response = self.auth.get(adress)
             if (
                 "page_obj" in response.context
             ):
@@ -82,14 +79,14 @@ class PostPagesTests(TestCase):
             self.check_post_info(post)
 
     def test_group_page_show_correct_context(self):
-        group = self.author_client.get(URL_GROUP).context.get("group")
+        group = self.auth.get(URL_GROUP).context.get("group")
         self.assertEqual(group.title, PostPagesTests.group.title)
         self.assertEqual(group.slug, PostPagesTests.group.slug),
         self.assertEqual(group.pk, PostPagesTests.group.pk),
         self.assertEqual(group.description, PostPagesTests.group.description)
 
     def test_profile_page_show_correct_context(self):
-        author = self.author_client.get(URL_AUTHOR_PROFILE).context.get(
+        author = self.auth.get(URL_AUTHOR_PROFILE).context.get(
             "author"
         )
         self.assertEqual(author.username, PostPagesTests.author_user.username)
@@ -117,7 +114,7 @@ class PaginatorViewsTest(TestCase):
         Post.objects.bulk_create(objs)
 
     def setUp(self):
-        self.unauthorized_client = Client()
+        self.anon = Client()
 
     def test_paginator_on_pages(self):
         """Проверка пагинации на страницах."""
@@ -125,7 +122,7 @@ class PaginatorViewsTest(TestCase):
             with self.subTest(reverse_address=reverse_address):
                 self.assertEqual(
                     len(
-                        self.unauthorized_client.get(
+                        self.anon.get(
                             reverse_address
                         ).context.get("page_obj")
                     ),
@@ -133,7 +130,7 @@ class PaginatorViewsTest(TestCase):
                 )
                 self.assertEqual(
                     len(
-                        self.unauthorized_client.get(
+                        self.anon.get(
                             reverse_address + "?page=2"
                         ).context.get("page_obj")
                     ),
